@@ -135,10 +135,26 @@ void ZoomApp::updateZoomView(sf::Vector2i mousePos) {
     // (1) Get position of mouse relative to viewport's top-left in window pixel units.
     //     Remember that in SFML, viewports' position and size are both given as PERCENTAGES
     //     of the window size.
+    sf::FloatRect viewPort = mWorldViewDefault.getViewport();
+    sf::Vector2u windowSize = mWindow.getSize();
+    sf::Vector2u relativePos = sf::Vector2u(
+        mousePos.x - viewPort.position.x * windowSize.x,
+        mousePos.y - viewPort.position.y * windowSize.y
+    );
     // (2) Get position of mouse relative to viewport's top-left as percentage of original
     //     viewport.
+    sf::Vector2f viewSize = viewPort.size;
+    sf::Vector2f percentPos = sf::Vector2f(
+        relativePos.x/(float)(viewSize.x * windowSize.x), 
+        relativePos.y/(float)(viewSize.y * windowSize.y)
+    );
     // (3) Then use that to get pos of mouse relative to world top-left in world units.
+    sf::Vector2f worldPos = sf::Vector2f(
+        percentPos.x * windowSize.x,
+        
+    );
     // (4) Derive the new viewport center (in world units)
+    mWorldViewZoomed.setCenter(worldPos);
     //     which keeps the mouse position pointing at the same thing in
     //     original image but now within a world-space rectangle of size
     //     mWorldSize / ZOOM_FACTOR.
@@ -151,8 +167,10 @@ void ZoomApp::render() {
     mWindow.clear(sf::Color::Black);
     if (!mIsZooming) {
         // TODO: If the user is not zooming in, use the default world view.
+        mWindow.setView(mWorldViewDefault);
     } else {
         // TODO: If the user is zooming in, use the zoomed world view.
+        mWindow.setView(mWorldViewZoomed);
     }
     mWindow.draw(*mWaldoSprite);
     mWindow.display();
