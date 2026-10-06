@@ -88,9 +88,44 @@ void ZoomApp::updateViewAfterResize() {
     //      Color::Black in render()
     // ====== ====== ======
 
+    // Get current aspect ratios
+    sf::Vector2u windowSize = mWindow.getSize();
+    float winRatio = (float)windowSize.x / (float)windowSize.y;
+//    std::cout << "winRatio: " << winRatio << "\n";
+
+    sf::Vector2u textureSize = mWaldoTexture.getSize();
+    float texRatio = (float)textureSize.x / (float)textureSize.y;
+//    std::cout << "texRatio: " << texRatio << "\n";
+
+    sf::FloatRect newViewport;
+    // Determine if scaling is limited on top/bottom or left/right
+    if( winRatio > texRatio ) { // Top/bottom limit
+        newViewport = sf::FloatRect(
+            {(1.f - texRatio/winRatio) / 2.f, 0.f},
+            {texRatio/winRatio, 1.f}
+        );
+    }
+    else {  // Left/right limit
+        newViewport = sf::FloatRect(
+            {0.f, (1.f - winRatio/texRatio) / 2.f},
+            {1.f, winRatio/texRatio}
+        );
+    }
+
+//    std::cout << "newViewport pos: (" << newViewport.position.x << ',' << newViewport.position.y << ")\n";
+//    std::cout << "newViewport siz: (" << newViewport.size.x << ',' << newViewport.size.y << ")\n";
+
     // Calculate newViewport based on aspect ratios of window and of mWorldSize. Then:
-    // mWorldViewDefault.setViewport(newViewport);
-    // mWorldViewZoomed.setViewport(newViewport);
+
+    // Apply appropriate view to window
+    if(mIsZooming) {
+        mWorldViewZoomed.setViewport(newViewport);
+        mWindow.setView(mWorldViewZoomed);
+    }
+    else {
+        mWorldViewDefault.setViewport(newViewport);
+        mWindow.setView(mWorldViewDefault);
+    }
 }
 
 // updateZoomView sets the center of mWorldViewZoomed such that the zoomed view would have the
