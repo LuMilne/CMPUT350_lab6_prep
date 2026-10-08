@@ -135,32 +135,45 @@ void ZoomApp::updateZoomView(sf::Vector2i mousePos) {
     // (1) Get position of mouse relative to viewport's top-left in window pixel units.
     //     Remember that in SFML, viewports' position and size are both given as PERCENTAGES
     //     of the window size.
-    sf::FloatRect viewPort = mWorldViewDefault.getViewport();
-    sf::Vector2u windowSize = mWindow.getSize();
+    sf::FloatRect viewPort = mWindow.getView().getViewport();
+    sf::Vector2u viewSize = mWindow.getSize();
+    //      viewPort.position = (0..1,0..1) , viewPort * viewSize = unit position of viewPort
     sf::Vector2u relativePos = sf::Vector2u(
-        mousePos.x - viewPort.position.x * windowSize.x,
-        mousePos.y - viewPort.position.y * windowSize.y
+        mousePos.x - viewPort.position.x * (float)viewSize.x,
+        mousePos.y - viewPort.position.y * (float)viewSize.y
     );
     // (2) Get position of mouse relative to viewport's top-left as percentage of original
-    //     viewport.
-    sf::Vector2f viewSize = viewPort.size;
+    //     viewport.size * viewSize = unit size of viewPort
     sf::Vector2f percentPos = sf::Vector2f(
-        relativePos.x/(float)(viewSize.x * windowSize.x), 
-        relativePos.y/(float)(viewSize.y * windowSize.y)
+        relativePos.x/(float)(viewPort.size.x * viewSize.x), 
+        relativePos.y/(float)(viewPort.size.y * viewSize.y)
     );
     // (3) Then use that to get pos of mouse relative to world top-left in world units.
-    sf::Vector2f worldPos = sf::Vector2f(
-        percentPos.x * windowSize.x,
-        
+    sf::Vector2f worldCenter = mWorldViewDefault.getCenter();
+    sf::Vector2f dWorldSize = mWorldViewDefault.getSize();
+    //      worldCenter - dWorldSize / 2.f = world origin
+    //      percentPos * dWorldSize = relative position to origin in world units
+    sf::Vector2u worldPos = sf::Vector2u(
+        worldCenter.x - dWorldSize.x / 2.f + (percentPos.x * dWorldSize.x),
+        worldCenter.y - dWorldSize.y / 2.f + (percentPos.y * dWorldSize.y)
     );
+
     // (4) Derive the new viewport center (in world units)
-    mWorldViewZoomed.setCenter(worldPos);
     //     which keeps the mouse position pointing at the same thing in
     //     original image but now within a world-space rectangle of size
     //     mWorldSize / ZOOM_FACTOR.
     //  HINT: Determine the steps to go from the desired center to the top-left of this new
     //        world-space rectangle, then from this top-left to the thing you're pointing at,
     //        using our above computed vars. Then solve the equation for the desired center.
+
+    //      percentPos - 0.5f = offset from center
+    sf::Vector2f zoomSize = mWorldViewZoomed.getSize();
+    sf::Vector2f desiredCenter = sf::Vector2f(
+        worldPos.x - ( percentPos.x - 0.5f ) * zoomSize.x,
+        worldPos.y - ( percentPos.y - 0.5f ) * zoomSize.y
+    );
+
+    mWorldViewZoomed.setCenter(desiredCenter);
 }
 
 void ZoomApp::render() {
