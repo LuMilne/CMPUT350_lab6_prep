@@ -118,12 +118,12 @@ void ZoomApp::updateViewAfterResize() {
     // Calculate newViewport based on aspect ratios of window and of mWorldSize. Then:
 
     // Apply appropriate view to window
+    mWorldViewZoomed.setViewport(newViewport);
+    mWorldViewDefault.setViewport(newViewport);
     if(mIsZooming) {
-        mWorldViewZoomed.setViewport(newViewport);
         mWindow.setView(mWorldViewZoomed);
     }
     else {
-        mWorldViewDefault.setViewport(newViewport);
         mWindow.setView(mWorldViewDefault);
     }
 }
