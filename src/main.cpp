@@ -89,12 +89,12 @@ void ZoomApp::updateViewAfterResize() {
     // ====== ====== ======
 
     // Get current aspect ratios
-    sf::Vector2u windowSize = mWindow.getSize();
-    float winRatio = (float)windowSize.x / (float)windowSize.y;
+    const sf::Vector2u windowSize = mWindow.getSize();
+    const float winRatio = (float)windowSize.x / (float)windowSize.y;
 //    std::cout << "winRatio: " << winRatio << "\n";
 
-    sf::Vector2u textureSize = mWaldoTexture.getSize();
-    float texRatio = (float)textureSize.x / (float)textureSize.y;
+    const sf::Vector2u textureSize = mWaldoTexture.getSize();
+    const float texRatio = (float)textureSize.x / (float)textureSize.y;
 //    std::cout << "texRatio: " << texRatio << "\n";
 
     sf::FloatRect newViewport;
@@ -135,25 +135,25 @@ void ZoomApp::updateZoomView(sf::Vector2i mousePos) {
     // (1) Get position of mouse relative to viewport's top-left in window pixel units.
     //     Remember that in SFML, viewports' position and size are both given as PERCENTAGES
     //     of the window size.
-    sf::FloatRect viewPort = mWindow.getView().getViewport();
-    sf::Vector2u viewSize = mWindow.getSize();
+    const sf::FloatRect viewPort = mWindow.getView().getViewport();
+    const sf::Vector2u viewSize = mWindow.getSize();
     //      viewPort.position = (0..1,0..1) , viewPort * viewSize = unit position of viewPort
-    sf::Vector2u relativePos = sf::Vector2u(
+    const sf::Vector2u relativePos = sf::Vector2u(
         mousePos.x - viewPort.position.x * (float)viewSize.x,
         mousePos.y - viewPort.position.y * (float)viewSize.y
     );
     // (2) Get position of mouse relative to viewport's top-left as percentage of original
     //     viewport.size * viewSize = unit size of viewPort
-    sf::Vector2f percentPos = sf::Vector2f(
+    const sf::Vector2f percentPos = sf::Vector2f(
         relativePos.x/(float)(viewPort.size.x * viewSize.x), 
         relativePos.y/(float)(viewPort.size.y * viewSize.y)
     );
     // (3) Then use that to get pos of mouse relative to world top-left in world units.
-    sf::Vector2f worldCenter = mWorldViewDefault.getCenter();
-    sf::Vector2f dWorldSize = mWorldViewDefault.getSize();
+    const sf::Vector2f worldCenter = mWorldViewDefault.getCenter();
+    const sf::Vector2f dWorldSize = mWorldViewDefault.getSize();
     //      worldCenter - dWorldSize / 2.f = world origin
     //      percentPos * dWorldSize = relative position to origin in world units
-    sf::Vector2u worldPos = sf::Vector2u(
+    const sf::Vector2u worldPos = sf::Vector2u(
         worldCenter.x - dWorldSize.x / 2.f + (percentPos.x * dWorldSize.x),
         worldCenter.y - dWorldSize.y / 2.f + (percentPos.y * dWorldSize.y)
     );
@@ -167,8 +167,8 @@ void ZoomApp::updateZoomView(sf::Vector2i mousePos) {
     //        using our above computed vars. Then solve the equation for the desired center.
 
     //      percentPos - 0.5f = offset from center
-    sf::Vector2f zoomSize = mWorldViewZoomed.getSize();
-    sf::Vector2f desiredCenter = sf::Vector2f(
+    const sf::Vector2f zoomSize = mWorldViewZoomed.getSize();
+    const sf::Vector2f desiredCenter = sf::Vector2f(
         worldPos.x - ( percentPos.x - 0.5f ) * zoomSize.x,
         worldPos.y - ( percentPos.y - 0.5f ) * zoomSize.y
     );
